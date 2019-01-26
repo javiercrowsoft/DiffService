@@ -26,6 +26,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"         %% "akka-http"                  % vAkkaHttp
     exclude ("com.typesafe.akka", "akka-stream_2.12")
     exclude ("com.typesafe.akka", "akka-actor_2.12"),
+  "com.typesafe.akka"         %% "akka-remote"                % vAkka
+    exclude ("com.typesafe.akka", "akka-stream_2.12"),
 
   // --- Testing ---
   "org.scalatest"             %% "scalatest"                  % vScalatest % Test,
