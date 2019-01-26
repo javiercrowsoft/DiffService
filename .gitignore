@@ -1,2 +1,49 @@
+.idea
+target
 *.class
 *.log
+*.swp
+# sbt specific
+.cache-main
+.cache-tests
+.cache
+.history
+.lib/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/project
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# Eclipse IDE
+.classpath
+.project
+
+#Commit only the app dir.
+.bash_logout
+.bashrc
+.config/
+.profile
+.ssh/
+.vim/
+.viminfo
+.vimrc
+.volume-migrate-data.sh
+apache2
+data/
+nginx
+tomcat
+tomcat6/
+tomcat7/
+/bin/
+docker/app/
+docker/monorail-cluster/*.tar
+docker/monorail-out/*.tar
+docker/monorail-cluster/monorail-in/*.tar
+log
