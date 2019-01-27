@@ -9,7 +9,8 @@ import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.pattern.ask
 import akka.util.Timeout
 import ar.com.crowsoft.diffservice.io.FileActor._
-import ar.com.crowsoft.diffservice.io.{FileData, FileSide, LeftFile, RightFile}
+import ar.com.crowsoft.diffservice.io.DiffActor._
+import ar.com.crowsoft.diffservice.io.{FileData, FileSide, LeftFile, RightFile, DiffActor}
 import ar.com.crowsoft.diffservice.logging.Logging
 import ar.com.crowsoft.diffservice.routes.admin.HealthCheck
 import com.typesafe.config.Config
@@ -26,14 +27,31 @@ trait DiffServiceRoutes extends Logging {
 
   def fileActor: ActorRef
 
+  def diffActor: ActorRef
+
   private implicit lazy val timeout = Timeout(config.getInt("diff-service.request-timeout-in-seconds").seconds)
 
   lazy val diffServiceRoutes: Route =
-    pathPrefix("diffservice") {
-      saveFileRoute(LeftFile()) ~ saveFileRoute(RightFile()) ~ HealthCheck()
+    pathPrefix("diffservice" / "v1" / "diff") {
+      saveFileRoute(LeftFile()) ~ saveFileRoute(RightFile()) ~
+      path(Segment) { (id) =>
+        val result = (diffActor ? Compare(id)).mapTo[DiffResult]
+        onComplete(result) { resultTry =>
+          complete {
+            resultTry match {
+              case Success(a) =>
+                log.info(s"diff result: {}", a.description)
+                (StatusCodes.OK, a.description)
+              case Failure(e) =>
+                log.error(e, s"Error when comparing files")
+                HttpResponse(500, entity = "Operation has failed")
+            }
+          }
+        }
+      } ~ HealthCheck()
     }
 
-  def saveFileRoute(fileSide: FileSide) = path("v1" / "diff" / Segment / fileSide.name.toLowerCase) { (id) =>
+  def saveFileRoute(fileSide: FileSide) = path(Segment / fileSide.name.toLowerCase) { (id) =>
     put {
       entity(as[FileData]) { fileData => saveFile(id, fileData, fileSide) }
     }
