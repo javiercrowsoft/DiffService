@@ -10,7 +10,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import ar.com.crowsoft.diffservice.io.DiffActor._
 import ar.com.crowsoft.diffservice.io.FileActor._
-import ar.com.crowsoft.diffservice.io.{FileData, FileSide, LeftFile, RightFile}
+import ar.com.crowsoft.diffservice.io.{FileData, FileSide, LeftFile, RightFile, isMissingCode}
 import ar.com.crowsoft.diffservice.logging.Logging
 import ar.com.crowsoft.diffservice.routes.admin.HealthCheck
 import com.typesafe.config.Config
@@ -74,7 +74,11 @@ trait DiffServiceRoutes extends Logging {
         resultTry match {
           case Success(diffResult) =>
             log.info(s"diff result: {}", diffResult.description)
-            (StatusCodes.OK, write(diffResult))
+            val statusCode = diffResult.result match {
+              case code if isMissingCode(code) => StatusCodes.NotFound
+              case _ => StatusCodes.OK
+            }
+            (statusCode, write(diffResult))
           case Failure(e) =>
             log.error(e, s"Error when comparing files")
             HttpResponse(500, entity = "Operation has failed")

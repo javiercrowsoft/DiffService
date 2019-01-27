@@ -109,8 +109,16 @@ class DiffServiceRoutesSpec extends WordSpec
 
     override def run(sender: ActorRef, msg: Any) = {
       msg match {
-        case Compare(id) =>
-          sender ! DiffResult(304, "files are identical!")
+        case Compare(id) if id == "id1" =>
+          sender ! DiffResult(304, "The files are identical")
+          TestActor.KeepRunning
+
+        case Compare(id) if id == "id2" =>
+          sender ! DiffResult(409, "The files's size aren't equal")
+          TestActor.KeepRunning
+
+        case Compare(id) if id == "id3" =>
+          sender ! DiffResult(600, "Bothf files are missing")
           TestActor.KeepRunning
 
         case _ => TestActor.NoAutoPilot
@@ -153,6 +161,15 @@ class DiffServiceRoutesSpec extends WordSpec
         Get("/diffservice/v1/diff/id1") ~> route ~> check {
           response.status should be (StatusCodes.OK)
         }
+
+        Get("/diffservice/v1/diff/id2") ~> route ~> check {
+          response.status should be (StatusCodes.OK)
+        }
+
+        Get("/diffservice/v1/diff/id3") ~> route ~> check {
+          response.status should be (StatusCodes.NotFound)
+        }
+
       }
     }
   }

@@ -36,6 +36,10 @@ package object io {
   val LeftMissing = CompareResult(601, "Left file is missing")
   val RightMissing = CompareResult(602, "Right file is missing")
 
+  val MisingFiles = List(BothMissing, LeftMissing, RightMissing)
+
+  def isMissingCode(code: Int) = MisingFiles.exists(cr => cr.code == code)
+
   case class CompareInfo(result: CompareResult, diffs: List[DiffDetail] = List())
 
   object File extends File {
