@@ -22,7 +22,7 @@ class FileActor(config: Config, file: File) extends Actor with ActorLogging {
         val bytes = Base64.getDecoder().decode(fileData.data)
         val folder = s"$storagePath/$id"
         val filename = s"${fileSide.name}.out"
-        val path = file.saveFile(folder, filename, id, bytes)
+        val path = file.saveFile(folder, filename, bytes)
         sender() ! FileSaveResult(path.toAbsolutePath.toString, s"file saved!")
     }
 

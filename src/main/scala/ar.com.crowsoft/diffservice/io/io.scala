@@ -17,11 +17,11 @@ package object io {
   }
 
   trait File {
-    def saveFile(folder:String, filename: String, id: String, bytes: Array[Byte]): Path
+    def saveFile(folder:String, filename: String, bytes: Array[Byte]): Path
   }
 
   object File extends File {
-    def saveFile(folder: String, filename: String, id: String, bytes: Array[Byte]): Path = {
+    def saveFile(folder: String, filename: String, bytes: Array[Byte]): Path = {
       val dir = new java.io.File(folder)
       if(!dir.exists) dir.mkdirs()
       Files.write(Paths.get(s"$folder/$filename"), bytes)
