@@ -2,13 +2,13 @@ package ar.com.crowsoft.diffservice.io
 
 import akka.actor.{Actor, ActorLogging, Props}
 import com.typesafe.config.Config
-import java.util.Base64
 
 object DiffActor {
   def props(config: Config, file: File) = Props(classOf[DiffActor], config, file)
 
   case class Compare(id: String)
-  case class DiffResult(description: String)
+  case class DiffDetail(offset: Int, length: Int)
+  case class DiffResult(result: Int, description: String, diffs: List[DiffDetail] = List())
 }
 
 class DiffActor(config: Config, file: File) extends Actor with ActorLogging {
@@ -19,7 +19,9 @@ class DiffActor(config: Config, file: File) extends Actor with ActorLogging {
 
   def receive: Receive = {
     case Compare(id) =>
-      sender() ! DiffResult(s"I don't know :P !")
+      val folder = s"$storagePath/$id"
+      val compareInfo = file.diffFiles(s"$folder/${LeftFile()}.out", s"$folder/${RightFile()}.out")
+      sender() ! DiffResult(compareInfo.result.code, compareInfo.result.description, compareInfo.diffs)
   }
 
 

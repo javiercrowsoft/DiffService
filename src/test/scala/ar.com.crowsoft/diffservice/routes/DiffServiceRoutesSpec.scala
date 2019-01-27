@@ -27,7 +27,7 @@ class DiffServiceRoutesSpec extends WordSpec
   lazy val diffServiceCfg = ConfigFactory.parseString {
     s"""
       diff-service {
-        request-timeout-in-seconds = 5
+        request-timeout-in-seconds = 15
       }
       """.stripMargin
   }
@@ -110,7 +110,7 @@ class DiffServiceRoutesSpec extends WordSpec
     override def run(sender: ActorRef, msg: Any) = {
       msg match {
         case Compare(id) =>
-          sender ! DiffResult("files are identical!")
+          sender ! DiffResult(304, "files are identical!")
           TestActor.KeepRunning
 
         case _ => TestActor.NoAutoPilot

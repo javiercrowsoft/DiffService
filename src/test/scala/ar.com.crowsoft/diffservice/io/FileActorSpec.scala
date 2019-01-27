@@ -48,6 +48,9 @@ class FileActorSpec extends WordSpec
     def saveFile(folder: String, filename: String, bytes: Array[Byte]): Path = {
       Paths.get(s"$folder/$filename").toAbsolutePath
     }
+    def diffFiles(filenameLeft: String, filenameRight: String): CompareInfo = {
+      CompareInfo(Identical)
+    }
   }
 
   val fileActor = system.actorOf(FileActor.props(base, FileTest), "fileActor")
