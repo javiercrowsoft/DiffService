@@ -30,9 +30,9 @@ libraryDependencies ++= Seq(
     exclude ("com.typesafe.akka", "akka-stream_2.12"),
 
   // --- Testing ---
-  "org.scalatest"             %% "scalatest"                  % vScalatest % Test,
-  "com.typesafe.akka"         %% "akka-testkit"               % vAkka % Test,
-  "com.typesafe.akka"         %% "akka-http-testkit"          % vAkkaHttp % Test,
+  "org.scalatest"             %% "scalatest"                  % vScalatest % "it,test",
+  "com.typesafe.akka"         %% "akka-testkit"               % vAkka % "it,test",
+  "com.typesafe.akka"         %% "akka-http-testkit"          % vAkkaHttp % "it,test",
 
   // --- Log ---
   "org.slf4j"                 %  "slf4j-api"                  % vSlf4J,
@@ -41,3 +41,9 @@ libraryDependencies ++= Seq(
     exclude("org.slf4j", "slf4j-api")
 
 )
+
+lazy val root = (project in file("."))
+  .configs(IntegrationTest)
+  .settings(
+    Defaults.itSettings
+  )

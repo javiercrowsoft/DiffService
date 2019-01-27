@@ -5,7 +5,7 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives.handleRejections
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
-import ar.com.crowsoft.diffservice.io.FileActor
+import ar.com.crowsoft.diffservice.io.{File, FileActor}
 import ar.com.crowsoft.diffservice.routes.{DiffServiceRejectionHandler, DiffServiceRoutes}
 import com.typesafe.config.ConfigFactory
 
@@ -27,7 +27,7 @@ object DiffService extends App with DiffServiceRoutes with DiffServiceRejectionH
   implicit val system: ActorSystem = ActorSystem("diff-service-actor-system", config)
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  val fileActor = system.actorOf(FileActor.props(config), "fileActor")
+  val fileActor = system.actorOf(FileActor.props(config, File), "fileActor")
 
   lazy val routes: Route = handleRejections(diffServiceRejectionHandler) {
     diffServiceRoutes
