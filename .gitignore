@@ -44,3 +44,6 @@ tomcat7/
 /bin/
 docker/app/
 log
+
+# Folder where diff-service stores temporary files
+storage
