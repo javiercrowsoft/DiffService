@@ -43,7 +43,4 @@ tomcat6/
 tomcat7/
 /bin/
 docker/app/
-docker/monorail-cluster/*.tar
-docker/monorail-out/*.tar
-docker/monorail-cluster/monorail-in/*.tar
 log
