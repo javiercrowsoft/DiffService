@@ -8,7 +8,7 @@ A simple service that returns a diff between two files
 curl '0.0.0.0:8080/diffservice/admin/health-check'
 ```
 
-## send a file
+## Send a file
 
 ```
 curl -H'content-type:application/json' -XPUT 'http://0.0.0.0:8080/diffservice/v1/diff/id1/left' -d \
@@ -25,13 +25,13 @@ curl -H'content-type:application/json' -XPUT 'http://0.0.0.0:8080/diffservice/v1
 
 ```
 
-## to execute a diff and get the result
+## To execute a diff and get the result
 
 ```
 curl -v 'http://0.0.0.0:8080/diffservice/v1/diff/id1'
 ```
 
-### response of diff
+### Diff response
 
 The service will return a http status code 200 when left and right files are found and a json with the result
 
