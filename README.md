@@ -16,14 +16,13 @@ curl -H'content-type:application/json' -XPUT 'http://0.0.0.0:8080/diffservice/v1
   "name": "foo",
   "data": "xxx"
 }'
-```
 
-```
-curl -H'content-type:application/json' -XPUT 'http://0.0.0.0:8080/diffservice/v1/diff/id1/left' -d@src/it/resources/scala_small.json
-```
+curl -H'content-type:application/json' -XPUT 'http://0.0.0.0:8080/diffservice/v1/diff/id1/right' -d \
+'{
+  "name": "foo",
+  "data": "xxx"
+}'
 
-```
-curl -H'content-type:application/json' -XPUT 'http://0.0.0.0:8080/diffservice/v1/diff/id1/left' -d@src/it/resources/scala_big.json
 ```
 
 ## to execute a diff and get the result
@@ -68,3 +67,35 @@ it will be:
 - 600 when both are missing
 - 601 when left is missing
 - 602 when right is missing
+
+## Testing
+
+To create json files with base64 encoded data you can use a python script located in folder src/it/resources/scripts. There are some example files in folders images and text in src/it/resources
+
+```
+cd src/it/resources/
+mkdir base64
+python scripts/filetojson.py images/Scala_logo.bmp base64/biga.json
+python scripts/filetojson.py images/Scala_logoB.bmp base64/bigb.json
+```
+
+Then you can use curl to test
+
+```
+curl -H'content-type:application/json' -XPUT 'http://0.0.0.0:8080/diffservice/v1/diff/id1/right' -d@base64/bigb.json
+curl -H'content-type:application/json' -XPUT 'http://0.0.0.0:8080/diffservice/v1/diff/id1/left' -d@base64/biga.json
+curl -v 'http://0.0.0.0:8080/diffservice/v1/diff/id1'
+```
+
+To run test use
+
+```
+sbt test
+sbt it:test
+```
+
+## Future improvements
+
+- Don't wait for diff endpoint to be called. Start the diff of files when both are present.
+- Keep files on memory and don't persist them.
+
