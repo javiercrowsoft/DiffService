@@ -7,6 +7,7 @@ import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
 import akka.testkit.TestActor.AutoPilot
 import akka.testkit.{TestActor, TestProbe}
 import ar.com.crowsoft.diffservice.actorSystemSupport.TestActorSystem
+import ar.com.crowsoft.diffservice.io.DiffActor.{Compare, DiffResult}
 import ar.com.crowsoft.diffservice.io.FileActor.{FileSaveResult, SaveFile}
 import com.typesafe.config.ConfigFactory
 import org.json4s.JsonDSL._
@@ -26,7 +27,7 @@ class DiffServiceRoutesSpec extends WordSpec
   lazy val diffServiceCfg = ConfigFactory.parseString {
     s"""
       diff-service {
-        request-timeout-in-seconds = 5
+        request-timeout-in-seconds = 15
       }
       """.stripMargin
   }
@@ -35,7 +36,7 @@ class DiffServiceRoutesSpec extends WordSpec
     """
       akka {
         loglevel: ERROR
-        netty.tcp.port : 9132
+        netty.tcp.port: 9132
         remote.netty.tcp.port: 9133
       }
       """.stripMargin
@@ -51,12 +52,15 @@ class DiffServiceRoutesSpec extends WordSpec
   def testActorSystem = this.system
 
   val fileActorTest = TestProbe("fileActor")
+  val diffActorTest = TestProbe("diffActor")
 
   class DiffServiceRouteTest extends DiffServiceRoutes {
 
     implicit val system = testActorSystem
 
     val fileActor = fileActorTest.ref
+
+    val diffActor = diffActorTest.ref
 
     val config = base
   }
@@ -81,12 +85,13 @@ class DiffServiceRoutesSpec extends WordSpec
     }
   }
 
+  fileActorTest.setAutoPilot(new FileActorAutoPilot())
+
   def testSaveFile(side: String)(route: Route) = {
     val data = "xxx"
     val name = "fileName"
     val body = compact(("name" -> name) ~~ ("data" -> data))
     val fileId = "id1"
-    fileActorTest.setAutoPilot(new FileActorAutoPilot())
 
     Put(s"/diffservice/v1/diff/$fileId/$side", body) ~> route ~> check {
       response.status should be (StatusCodes.Created)
@@ -99,6 +104,29 @@ class DiffServiceRoutesSpec extends WordSpec
       }
     }
   }
+
+  class DiffActorAutoPilot(implicit system: ActorSystem) extends AutoPilot {
+
+    override def run(sender: ActorRef, msg: Any) = {
+      msg match {
+        case Compare(id) if id == "id1" =>
+          sender ! DiffResult(304, "The files are identical")
+          TestActor.KeepRunning
+
+        case Compare(id) if id == "id2" =>
+          sender ! DiffResult(409, "The files's size aren't equal")
+          TestActor.KeepRunning
+
+        case Compare(id) if id == "id3" =>
+          sender ! DiffResult(600, "Bothf files are missing")
+          TestActor.KeepRunning
+
+        case _ => TestActor.NoAutoPilot
+      }
+    }
+  }
+
+  diffActorTest.setAutoPilot(new DiffActorAutoPilot())
 
   "File Route" when {
     "payload is jObject" should {
@@ -123,6 +151,26 @@ class DiffServiceRoutesSpec extends WordSpec
 
       "Save rigth file if name and data are present" in withRoute(testSaveFile("right"))
 
+    }
+  }
+
+  "Diff Route" when {
+    "id is present in storage" should {
+      "response with diff result" in withRoute { route =>
+
+        Get("/diffservice/v1/diff/id1") ~> route ~> check {
+          response.status should be (StatusCodes.OK)
+        }
+
+        Get("/diffservice/v1/diff/id2") ~> route ~> check {
+          response.status should be (StatusCodes.OK)
+        }
+
+        Get("/diffservice/v1/diff/id3") ~> route ~> check {
+          response.status should be (StatusCodes.NotFound)
+        }
+
+      }
     }
   }
 }

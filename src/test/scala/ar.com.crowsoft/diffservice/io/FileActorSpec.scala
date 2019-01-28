@@ -2,8 +2,7 @@ package ar.com.crowsoft.diffservice.io
 
 import java.nio.file.{Path, Paths}
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.testkit.{RouteTestTimeout, ScalatestRouteTest}
+import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.pattern.ask
 import akka.util.Timeout
 import ar.com.crowsoft.diffservice.actorSystemSupport.TestActorSystem
@@ -31,8 +30,8 @@ class FileActorSpec extends WordSpec
     """
       akka {
         loglevel: ERROR
-        netty.tcp.port : 9132
-        remote.netty.tcp.port: 9133
+        netty.tcp.port: 9134
+        remote.netty.tcp.port: 9135
       }
       """.stripMargin
   }
@@ -47,6 +46,9 @@ class FileActorSpec extends WordSpec
   object FileTest extends File {
     def saveFile(folder: String, filename: String, bytes: Array[Byte]): Path = {
       Paths.get(s"$folder/$filename").toAbsolutePath
+    }
+    def diffFiles(filenameLeft: String, filenameRight: String): CompareInfo = {
+      CompareInfo(Identical)
     }
   }
 
@@ -65,8 +67,8 @@ class FileActorSpec extends WordSpec
     val result = (fileActor ? SaveFile(fileId, FileData(name, data), fileSide)).mapTo[FileSaveResult]
 
         result onComplete {
-          case Success(a) =>
-            a.path should be(absolutePath)
+          case Success(saveResult) =>
+            saveResult.path should be(absolutePath)
           case Failure(e) =>
             fail()
         }
