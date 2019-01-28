@@ -36,7 +36,7 @@ class DiffServiceRoutesSpec extends WordSpec
     """
       akka {
         loglevel: ERROR
-        netty.tcp.port : 9132
+        netty.tcp.port: 9132
         remote.netty.tcp.port: 9133
       }
       """.stripMargin

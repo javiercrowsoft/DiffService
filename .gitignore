@@ -47,3 +47,6 @@ log
 
 # Folder where diff-service stores temporary files
 storage
+
+# some json files to test service
+src/it/resources/base64
