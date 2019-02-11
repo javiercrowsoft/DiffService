@@ -1,5 +1,6 @@
 package ar.com.crowsoft.diffservice.io
 
+import scala.concurrent.{Future, blocking}
 import akka.actor.{Actor, ActorLogging, Props}
 import com.typesafe.config.Config
 import java.util.Base64
@@ -19,6 +20,7 @@ class FileActor(config: Config, file: File) extends Actor with ActorLogging {
 
   def receive: Receive = {
       case SaveFile(id, fileData, fileSide) =>
+        val f = Future {}
         val bytes = Base64.getDecoder().decode(fileData.data)
         val folder = s"$storagePath/$id"
         val filename = s"${fileSide.name}.out"

@@ -36,8 +36,10 @@ trait DiffServiceRoutes extends Logging {
   implicit val formats = DefaultFormats
 
   lazy val diffServiceRoutes: Route =
-    pathPrefix("diffservice" / "v1" / "diff") {
-      saveFileRoute(LeftFile()) ~ saveFileRoute(RightFile()) ~ diffRoute ~ HealthCheck()
+    pathPrefix("diffservice") {
+      pathPrefix("v1" / "diff") {
+        saveFileRoute(LeftFile()) ~ saveFileRoute(RightFile()) ~ diffRoute
+      }  ~ HealthCheck()
     }
 
   def saveFileRoute(fileSide: FileSide) = path(Segment / fileSide.name.toLowerCase) { (id) =>
