@@ -5,7 +5,6 @@ import akka.actor.{Actor, ActorLogging, Props}
 import akka.pattern.pipe
 import com.typesafe.config.Config
 import java.util.Base64
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object FileActor {
   def props(config: Config, file: File) = Props(classOf[FileActor], config, file)
@@ -17,6 +16,8 @@ object FileActor {
 class FileActor(config: Config, file: File) extends Actor with ActorLogging {
 
   import FileActor._
+
+  implicit val blockingDispatcher = context.system.dispatchers.lookup("akka.io-blocking-dispatcher")
 
   lazy val storagePath = config.getString("diff-service.storage-path")
 
