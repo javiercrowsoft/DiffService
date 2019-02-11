@@ -1,6 +1,6 @@
 package ar.com.crowsoft.diffservice.io
 
-import scala.concurrent.{Future, blocking}
+import scala.concurrent.Future
 import akka.actor.{Actor, ActorLogging, Props}
 import akka.pattern.pipe
 import com.typesafe.config.Config
